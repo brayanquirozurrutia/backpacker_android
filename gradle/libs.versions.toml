@@ -1,13 +1,32 @@
 [versions]
 agp = "8.6.0"
 kotlin = "1.9.0"
-coreKtx = "1.10.1"
+coreKtx = "1.13.1"
 junit = "4.13.2"
-junitVersion = "1.1.5"
-espressoCore = "3.5.1"
-lifecycleRuntimeKtx = "2.6.1"
-activityCompose = "1.8.0"
-composeBom = "2024.04.01"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+ktorClientCio = "2.3.0"
+ktorClientCioVersion = "3.0.0-rc-1"
+ktorClientContentNegotiation = "2.3.0"
+ktorClientContentNegotiationVersion = "3.0.0-rc-1"
+ktorClientCore = "2.3.0"
+ktorClientCoreVersion = "3.0.0-rc-1"
+ktorClientLogging = "3.0.0-rc-1"
+ktorClientLoggingJvm = "1.6.3"
+ktorClientLoggingVersion = "2.3.4"
+ktorClientSerialization = "2.3.0"
+ktorKtorClientCio = "2.3.4"
+ktorKtorClientContentNegotiation = "2.3.4"
+ktorKtorClientCore = "2.3.4"
+ktorKtorSerializationKotlinxJson = "2.3.4"
+ktorSerializationKotlinxJson = "2.3.0"
+ktorSerializationKotlinxJsonVersion = "3.0.0-rc-1"
+lifecycleRuntimeKtx = "2.8.5"
+activityCompose = "1.9.2"
+composeBom = "2024.09.01"
+logbackClassic = "1.4.14"
+navigationRuntimeKtx = "2.8.0"
+navigationCompose = "2.8.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -24,6 +43,26 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktorClientCio" }
+ktor-client-cio-v234 = { module = "io.ktor:ktor-client-cio", version.ref = "ktorKtorClientCio" }
+ktor-client-cio-v300rc1 = { module = "io.ktor:ktor-client-cio", version.ref = "ktorClientCioVersion" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorClientContentNegotiation" }
+ktor-client-content-negotiation-v234 = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorKtorClientContentNegotiation" }
+ktor-client-content-negotiation-v300rc1 = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorClientContentNegotiationVersion" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorClientCore" }
+ktor-client-core-v234 = { module = "io.ktor:ktor-client-core", version.ref = "ktorKtorClientCore" }
+ktor-client-core-v300rc1 = { module = "io.ktor:ktor-client-core", version.ref = "ktorClientCoreVersion" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging" }
+ktor-client-logging-jvm = { module = "io.ktor:ktor-client-logging-jvm", version.ref = "ktorClientLoggingJvm" }
+ktor-client-logging-v234 = { module = "io.ktor:ktor-client-logging", version.ref = "ktorClientLoggingVersion" }
+ktor-client-serialization = { module = "io.ktor:ktor-client-serialization", version.ref = "ktorClientSerialization" }
+ktor-ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktorClientLogging" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorSerializationKotlinxJson" }
+ktor-serialization-kotlinx-json-v234 = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorKtorSerializationKotlinxJson" }
+ktor-serialization-kotlinx-json-v300rc1 = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorSerializationKotlinxJsonVersion" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logbackClassic" }
+androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
