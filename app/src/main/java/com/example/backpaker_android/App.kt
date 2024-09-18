@@ -1,12 +1,16 @@
 package com.example.backpaker_android
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.backpaker_android.ui.screens.CreateAccountScreen
 import com.example.backpaker_android.ui.screens.LoginScreen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
@@ -15,12 +19,19 @@ fun AppNavigation(navController: NavHostController, modifier: Modifier = Modifie
         modifier = modifier
     ) {
         composable("login") {
-            LoginScreen(onLoginSuccess = {
-                navController.navigate("home")
-            })
+            LoginScreen(
+                onLoginSuccess = { navController.navigate("home") },
+                onCreateAccount = { navController.navigate("create_account") }
+            )
         }
         composable("home") {
-            //HomeScreen()
+            // HomeScreen()
+        }
+        composable("create_account") {
+            CreateAccountScreen(
+                onRegisterSuccess = { navController.navigate("home") }
+            )
         }
     }
 }
+

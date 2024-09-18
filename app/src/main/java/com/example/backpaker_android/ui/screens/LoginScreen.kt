@@ -5,21 +5,23 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.backpaker_android.ui.components.CommonButton
 import com.example.backpaker_android.ui.components.CommonInput
+import com.example.backpaker_android.ui.components.InputType
 import com.example.backpaker_android.ui.components.Loading
-import com.example.backpaker_android.network.auth.AuthService
-import com.example.backpaker_android.network.auth.LoginResponse
-import kotlinx.coroutines.launch
+import com.example.backpaker_android.viewmodel.auth.LoginViewModel
 
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-
-    val scope = rememberCoroutineScope()
+fun LoginScreen(
+    onLoginSuccess: () -> Unit,
+    onCreateAccount: () -> Unit,
+    loginViewModel: LoginViewModel = viewModel()
+) {
+    val email by loginViewModel.email.collectAsState()
+    val password by loginViewModel.password.collectAsState()
+    val isLoading by loginViewModel.isLoading.collectAsState()
+    val errorMessage by loginViewModel.errorMessage.collectAsState()
 
     Column(
         modifier = Modifier
@@ -29,45 +31,41 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
     ) {
         CommonInput(
             value = email,
-            onValueChange = { email = it },
-            label = "Email",
-            modifier = Modifier.fillMaxWidth()
+            onValueChange = { loginViewModel.onEmailChanged(it) },
+            label = "Correo",
+            modifier = Modifier.fillMaxWidth(),
+            inputType = InputType.Email
         )
         Spacer(modifier = Modifier.height(8.dp))
         CommonInput(
             value = password,
-            onValueChange = { password = it },
-            label = "Password",
-            isPassword = true,
+            onValueChange = { loginViewModel.onPasswordChanged(it) },
+            label = "Contraseña",
+            inputType = InputType.Password,
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
 
         if (isLoading) {
-            // Mostrar el componente de carga mientras se realiza la solicitud
             Loading(modifier = Modifier.fillMaxSize())
         } else {
             CommonButton(
-                text = "Login",
-                onClick = {
-                    // Iniciar la solicitud de login en una coroutine
-                    scope.launch {
-                        isLoading = true
-                        errorMessage = null
-                        val response = AuthService.login(email, password)
-                        isLoading = false
-
-                        if (response.success) {
-                            onLoginSuccess()
-                        } else {
-                            errorMessage = response.message ?: "Login failed"
-                        }
-                    }
-                },
+                text = "Iniciar Sesión",
+                onClick = { loginViewModel.onLogin(onLoginSuccess) },
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Mostrar mensajes de error
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                TextButton(onClick = onCreateAccount) {
+                    Text("Crear cuenta")
+                }
+            }
+
             errorMessage?.let {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(

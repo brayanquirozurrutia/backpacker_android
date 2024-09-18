@@ -10,7 +10,7 @@ object AuthService {
     private val client = NetworkService.client
     private val json = Json { ignoreUnknownKeys = true }
 
-    suspend fun login(email: String, password: String): LoginResponse {
+    suspend fun login(email: String, password: String): AuthResponse {
         return try {
             val response: HttpResponse = client.post("http://10.0.2.2:8080/auth/login") {
                 contentType(ContentType.Application.Json)
@@ -19,11 +19,46 @@ object AuthService {
 
             val responseBody = response.bodyAsText()
 
-            json.decodeFromString<LoginResponse>(responseBody)
+            json.decodeFromString<AuthResponse>(responseBody)
         } catch (e: Exception) {
             e.printStackTrace()
             println("An error occurred: ${e.message}")
-            LoginResponse(success = false, message = "An error occurred: ${e.message}")
+            AuthResponse(success = false, message = "An error occurred: ${e.message}")
+        }
+    }
+
+    suspend fun register(
+        firstName: String,
+        lastName: String,
+        email: String,
+        birthDate: String,
+        gender: String,
+        password: String,
+        confirmPassword: String
+    ): AuthResponse {
+        return try {
+            val response: HttpResponse = client.post("http://10.0.2.2:8080/auth/register") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    mapOf(
+                        "firstName" to firstName,
+                        "lastName" to lastName,
+                        "email" to email,
+                        "birthDate" to birthDate,
+                        "gender" to gender,
+                        "password" to password,
+                        "confirmPassword" to confirmPassword
+                    )
+                )
+            }
+
+            val responseBody = response.bodyAsText()
+
+            json.decodeFromString<AuthResponse>(responseBody)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            println("An error occurred: ${e.message}")
+            AuthResponse(success = false, message = "An error occurred: ${e.message}")
         }
     }
 }
