@@ -29,7 +29,7 @@ fun AppNavigation(navController: NavHostController, modifier: Modifier = Modifie
         }
         composable("create_account") {
             CreateAccountScreen(
-                onRegisterSuccess = { navController.navigate("home") }
+                onRegisterSuccess = { navController.navigate("login") }
             )
         }
     }
