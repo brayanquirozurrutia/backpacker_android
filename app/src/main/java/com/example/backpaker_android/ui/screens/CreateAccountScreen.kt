@@ -33,6 +33,9 @@ fun CreateAccountScreen(
     val genderError by viewModel.genderError.collectAsState()
     val passwordError by viewModel.passwordError.collectAsState()
     val confirmPasswordError by viewModel.confirmPasswordError.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
+    var showAlert by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -109,9 +112,35 @@ fun CreateAccountScreen(
         } else {
             CommonButton(
                 text = "Crear Cuenta",
-                onClick = { viewModel.onRegister(onRegisterSuccess) },
+                onClick = {
+                    viewModel.onRegister {
+                        showAlert = true // Show alert when registration is successful
+                    }
+                },
                 modifier = Modifier.fillMaxWidth()
             )
         }
+
+        errorMessage?.let {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+    if (showAlert) {
+        CommonBasicAlert(
+            title = "Registro Exitoso",
+            message = "Tu cuenta ha sido creada exitosamente.",
+            buttonText = "Aceptar",
+            onDismiss = { showAlert = false },
+            onConfirm = {
+                showAlert = false
+                onRegisterSuccess()
+            },
+            dismissOnOutsideClick = false
+        )
     }
 }
