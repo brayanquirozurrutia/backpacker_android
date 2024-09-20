@@ -31,7 +31,8 @@ fun AppNavigation(navController: NavHostController, modifier: Modifier = Modifie
         }
         composable("create_account") {
             CreateAccountScreen(
-                onRegisterSuccess = { navController.navigate("login") }
+                onRegisterSuccess = { navController.navigate("login") },
+                onBack = { navController.popBackStack() }
             )
         }
         composable("forgot_password") {
