@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import com.example.backpaker_android.ui.components.CommonBasicAlert
 
 @Composable
 fun ForgotPasswordScreen(
@@ -31,6 +32,8 @@ fun ForgotPasswordScreen(
     val newPasswordError by forgotPasswordViewModel.newPasswordError.collectAsState()
     val confirmPasswordError by forgotPasswordViewModel.confirmPasswordError.collectAsState()
     val emailError by forgotPasswordViewModel.emailError.collectAsState()
+
+    var showAlert by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -94,7 +97,11 @@ fun ForgotPasswordScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     CommonButton(
                         text = "Restablecer Contraseña",
-                        onClick = { forgotPasswordViewModel.resetPassword(onPasswordResetSuccess) },
+                        onClick = {
+                            forgotPasswordViewModel.resetPassword {
+                                showAlert = true
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -114,6 +121,20 @@ fun ForgotPasswordScreen(
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
+        }
+
+        if (showAlert) {
+            CommonBasicAlert(
+                title = "Restablecimiento Exitoso",
+                message = "Tu contraseña ha sido restablecida correctamente.",
+                buttonText = "Aceptar",
+                onDismiss = { showAlert = false },
+                onConfirm = {
+                    showAlert = false
+                    onPasswordResetSuccess()
+                },
+                dismissOnOutsideClick = false
+            )
         }
     }
 }

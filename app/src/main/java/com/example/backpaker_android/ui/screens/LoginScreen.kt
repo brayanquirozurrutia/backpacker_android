@@ -23,6 +23,8 @@ fun LoginScreen(
     val password by loginViewModel.password.collectAsState()
     val isLoading by loginViewModel.isLoading.collectAsState()
     val errorMessage by loginViewModel.errorMessage.collectAsState()
+    val emailError by loginViewModel.emailError.collectAsState()
+    val passwordError by loginViewModel.passwordError.collectAsState()
 
     Column(
         modifier = Modifier
@@ -35,7 +37,10 @@ fun LoginScreen(
             onValueChange = { loginViewModel.onEmailChanged(it) },
             label = "Correo",
             modifier = Modifier.fillMaxWidth(),
-            inputType = InputType.Email
+            inputType = InputType.Email,
+            placeholder = "correo@mail.com",
+            error = emailError,
+            required = true
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
@@ -51,7 +56,10 @@ fun LoginScreen(
             onValueChange = { loginViewModel.onPasswordChanged(it) },
             label = "Contraseña",
             inputType = InputType.Password,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = "* * * * * * * *",
+            error = passwordError,
+            required = true
         )
         Spacer(modifier = Modifier.height(16.dp))
 

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.backpaker_android.network.auth.AuthService
 import com.example.backpaker_android.network.auth.AuthResponse
+import com.example.backpaker_android.utils.Utils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -86,7 +87,7 @@ class RegisterViewModel : ViewModel() {
                 hasError = true
             }
 
-            if (!isValidEmail(cleanedEmail)) {
+            if (!Utils.isValidEmail(cleanedEmail)) {
                 _emailError.value = "Correo electrónico no válido"
                 hasError = true
             }
@@ -146,10 +147,6 @@ class RegisterViewModel : ViewModel() {
         _passwordError.value = null
         _confirmPasswordError.value = null
         _errorMessage.value = null
-    }
-
-    private fun isValidEmail(email: String): Boolean {
-        return email.contains("@") && email.contains(".")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
