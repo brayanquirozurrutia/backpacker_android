@@ -16,7 +16,8 @@ import com.example.backpaker_android.viewmodel.auth.LoginViewModel
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onCreateAccount: () -> Unit,
-    loginViewModel: LoginViewModel = viewModel()
+    loginViewModel: LoginViewModel = viewModel(),
+    onForgotPassword: () -> Unit
 ) {
     val email by loginViewModel.email.collectAsState()
     val password by loginViewModel.password.collectAsState()
@@ -37,6 +38,14 @@ fun LoginScreen(
             inputType = InputType.Email
         )
         Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            TextButton(onClick = onForgotPassword) {
+                Text("¿Olvidaste tu contraseña?")
+            }
+        }
         CommonInput(
             value = password,
             onValueChange = { loginViewModel.onPasswordChanged(it) },

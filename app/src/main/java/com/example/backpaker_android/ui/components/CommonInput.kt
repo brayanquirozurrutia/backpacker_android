@@ -6,24 +6,29 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.*
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.KeyboardType
 
 @Composable
 fun CommonInput(
+    modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
     inputType: InputType = InputType.Text,
-    modifier: Modifier = Modifier,
-    error: String? = null
+    error: String? = null,
+    placeholder: String? = null,
+    required: Boolean = false,
 ) {
     Column(modifier) {
-        Text(text = label, style = MaterialTheme.typography.labelMedium)
+        Text(
+            text = if (required) "$label *" else label,
+            style = MaterialTheme.typography.labelMedium
+        )
+
         TextField(
             value = value,
             onValueChange = onValueChange,
-            label = { Text(label) },
+            placeholder = { Text(placeholder ?: "") },
             visualTransformation = when (inputType) {
                 InputType.Password -> PasswordVisualTransformation()
                 else -> VisualTransformation.None
@@ -41,6 +46,7 @@ fun CommonInput(
             isError = error != null,
             modifier = modifier
         )
+
         if (error != null) {
             Text(
                 text = error,

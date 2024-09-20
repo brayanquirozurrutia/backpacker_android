@@ -8,6 +8,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.backpaker_android.ui.screens.CreateAccountScreen
+import com.example.backpaker_android.ui.screens.ForgotPasswordScreen
 import com.example.backpaker_android.ui.screens.LoginScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -21,7 +22,8 @@ fun AppNavigation(navController: NavHostController, modifier: Modifier = Modifie
         composable("login") {
             LoginScreen(
                 onLoginSuccess = { navController.navigate("home") },
-                onCreateAccount = { navController.navigate("create_account") }
+                onCreateAccount = { navController.navigate("create_account") },
+                onForgotPassword = { navController.navigate("forgot_password") }
             )
         }
         composable("home") {
@@ -30,6 +32,12 @@ fun AppNavigation(navController: NavHostController, modifier: Modifier = Modifie
         composable("create_account") {
             CreateAccountScreen(
                 onRegisterSuccess = { navController.navigate("login") }
+            )
+        }
+        composable("forgot_password") {
+            ForgotPasswordScreen(
+                onPasswordResetSuccess = { navController.navigate("login") },
+                onBack = { navController.popBackStack() }
             )
         }
     }

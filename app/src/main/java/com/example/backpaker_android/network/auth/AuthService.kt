@@ -61,4 +61,34 @@ object AuthService {
             AuthResponse(success = false, message = "An error occurred: ${e.message}")
         }
     }
+
+    suspend fun forgotPassword(email: String): AuthResponse {
+        return try {
+            val response: HttpResponse = client.post("http://10.0.2.2:8080/auth/forgot-password") {
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("email" to email))
+            }
+
+            val responseBody = response.bodyAsText()
+            json.decodeFromString<AuthResponse>(responseBody)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            AuthResponse(success = false, message = "An error occurred: ${e.message}")
+        }
+    }
+
+    suspend fun resetPassword(email: String, password: String, confirmPassword: String): AuthResponse {
+        return try {
+            val response: HttpResponse = client.post("http://10.0.2.2:8080/auth/reset-password") {
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("email" to email, "password" to password, "confirmPassword" to confirmPassword))
+            }
+
+            val responseBody = response.bodyAsText()
+            json.decodeFromString<AuthResponse>(responseBody)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            AuthResponse(success = false, message = "An error occurred: ${e.message}")
+        }
+    }
 }
