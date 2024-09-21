@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.backpaker_android.ui.screens.CreateAccountScreen
 import com.example.backpaker_android.ui.screens.ForgotPasswordScreen
+import com.example.backpaker_android.ui.screens.HomeScreen
 import com.example.backpaker_android.ui.screens.LoginScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -27,7 +28,7 @@ fun AppNavigation(navController: NavHostController, modifier: Modifier = Modifie
             )
         }
         composable("home") {
-            // HomeScreen()
+            HomeScreen()
         }
         composable("create_account") {
             CreateAccountScreen(

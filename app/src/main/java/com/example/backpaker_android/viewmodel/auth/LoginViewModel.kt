@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import com.example.backpaker_android.network.auth.AuthService
 import com.example.backpaker_android.network.auth.AuthResponse
+import com.example.backpaker_android.network.auth.LoginResponse
 import com.example.backpaker_android.utils.Utils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,7 +36,7 @@ class LoginViewModel : ViewModel() {
                 _isLoading.value = true
                 _errorMessage.value = null
                 try {
-                    val response: AuthResponse = AuthService.login(_email.value, _password.value)
+                    val response: LoginResponse = AuthService.login(_email.value, _password.value)
                     _isLoading.value = false
 
                     if (response.success) {

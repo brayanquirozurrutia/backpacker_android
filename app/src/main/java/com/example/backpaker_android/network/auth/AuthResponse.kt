@@ -7,3 +7,10 @@ data class AuthResponse(
     val success: Boolean,
     val message: String
 )
+
+@Serializable
+data class LoginResponse(
+    val success: Boolean,
+    val message: String,
+    val token: String
+)

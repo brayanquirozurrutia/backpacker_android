@@ -62,6 +62,8 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.play.services.location)
+    implementation(libs.androidx.storage)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -75,4 +77,7 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation.v234)
     implementation(libs.ktor.client.logging.v234)
     implementation(libs.ktor.serialization.kotlinx.json.v234)
+    implementation(libs.android.v1161)
+    implementation(libs.extension.maps.compose)
+    implementation(libs.material3)
 }
