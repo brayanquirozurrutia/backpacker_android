@@ -339,4 +339,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+gradle.properties
+
 # End of https://www.gitignore.io/api/java,linux,macos,windows,android,intellij,androidstudio
