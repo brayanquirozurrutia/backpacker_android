@@ -1,4 +1,4 @@
-package com.example.backpaker_android.ui.screens
+package com.example.backpaker_android.ui.screens.auth
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*

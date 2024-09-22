@@ -7,10 +7,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.backpaker_android.ui.screens.CreateAccountScreen
-import com.example.backpaker_android.ui.screens.ForgotPasswordScreen
-import com.example.backpaker_android.ui.screens.HomeScreen
-import com.example.backpaker_android.ui.screens.LoginScreen
+import com.example.backpaker_android.ui.screens.auth.CreateAccountScreen
+import com.example.backpaker_android.ui.screens.auth.ForgotPasswordScreen
+import com.example.backpaker_android.ui.screens.home.HomeScreen
+import com.example.backpaker_android.ui.screens.auth.LoginScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
