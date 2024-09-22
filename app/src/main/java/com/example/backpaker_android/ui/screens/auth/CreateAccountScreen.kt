@@ -1,4 +1,4 @@
-package com.example.backpaker_android.ui.screens
+package com.example.backpaker_android.ui.screens.auth
 
 import android.os.Build
 import androidx.annotation.RequiresApi

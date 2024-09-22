@@ -1,4 +1,4 @@
-package com.example.backpaker_android.ui.screens
+package com.example.backpaker_android.ui.screens.home
 
 import android.Manifest
 import android.content.Context
@@ -21,13 +21,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.location.LocationServices
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.locationcomponent.location
-
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -35,10 +35,11 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-
+import com.example.backpaker_android.viewmodel.home.HomeViewModel
+import com.example.backpaker_android.ui.components.Loading
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
     val context = LocalContext.current
     val mapView = rememberMapViewWithLifecycle(context)
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
@@ -47,7 +48,12 @@ fun HomeScreen() {
     var longitude by remember { mutableDoubleStateOf(0.0) }
     var showPermissionDialog by remember { mutableStateOf(false) }
 
+    val isLoading by homeViewModel.isLoading.collectAsState()
+    val errorMessage by homeViewModel.errorMessage.collectAsState()
+    val isDataLoaded by homeViewModel.isDataLoaded.collectAsState()
+
     LaunchedEffect(Unit) {
+        homeViewModel.fetchHomeData()
         if (context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 location?.let {
@@ -81,54 +87,64 @@ fun HomeScreen() {
         )
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Box(modifier = Modifier.weight(1f)) {
-            AndroidView({ mapView }) { mapView ->
-                mapView.mapboxMap.loadStyle(
-                    style = Style.MAPBOX_STREETS,
-                    onStyleLoaded = {
-                        mapView.location.updateSettings {
-                            enabled = true
-                            pulsingEnabled = true
-                        }
+    if (isDataLoaded) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.weight(1f)) {
+                AndroidView({ mapView }) { mapView ->
+                    mapView.mapboxMap.loadStyle(
+                        style = Style.MAPBOX_STREETS,
+                        onStyleLoaded = {
+                            mapView.location.updateSettings {
+                                enabled = true
+                                pulsingEnabled = true
+                            }
 
-                        if (latitude != 0.0 && longitude != 0.0) {
-                            mapView.mapboxMap.setCamera(
-                                CameraOptions.Builder()
-                                    .center(Point.fromLngLat(longitude, latitude))
-                                    .zoom(15.0)
-                                    .build()
-                            )
+                            if (latitude != 0.0 && longitude != 0.0) {
+                                mapView.mapboxMap.setCamera(
+                                    CameraOptions.Builder()
+                                        .center(Point.fromLngLat(longitude, latitude))
+                                        .zoom(15.0)
+                                        .build()
+                                )
+                            }
                         }
-                    }
-                )
-            }
-        }
-
-        NavigationBar(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = Color.White,
-            modifier = Modifier.height(56.dp)
-        ) {
-            val icons = listOf(
-                Icons.Filled.Home to "Inicio",
-                Icons.Filled.Search to "Buscar",
-                Icons.Filled.Add to "Agregar",
-                Icons.Filled.Favorite to "Favoritos",
-                Icons.Filled.Person to "Perfil"
-            )
-            icons.forEach { (icon, label) ->
-                NavigationBarItem(
-                    icon = { Icon(icon, contentDescription = null) },
-                    label = { Text(label) },
-                    selected = false, // Cambia esta lógica según la selección
-                    onClick = { /* Acción de navegación */ },
-                    alwaysShowLabel = true,
-                    colors = NavigationBarItemDefaults.colors(
-                        unselectedIconColor = Color.LightGray,
-                        selectedIconColor = Color.White
                     )
+                }
+
+                if (isLoading) {
+                    Loading()
+                }
+
+                if (errorMessage != null) {
+                    Text(text = errorMessage!!)
+                }
+            }
+
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = Color.White,
+                modifier = Modifier.height(56.dp)
+            ) {
+                val icons = listOf(
+                    Icons.Filled.Home to "Inicio",
+                    Icons.Filled.Search to "Buscar",
+                    Icons.Filled.Add to "Agregar",
+                    Icons.Filled.Favorite to "Favoritos",
+                    Icons.Filled.Person to "Perfil"
                 )
+                icons.forEach { (icon, label) ->
+                    NavigationBarItem(
+                        icon = { Icon(icon, contentDescription = null) },
+                        label = { Text(label) },
+                        selected = false, // Cambia esta lógica según la selección
+                        onClick = { /* Acción de navegación */ },
+                        alwaysShowLabel = true,
+                        colors = NavigationBarItemDefaults.colors(
+                            unselectedIconColor = Color.LightGray,
+                            selectedIconColor = Color.White
+                        )
+                    )
+                }
             }
         }
     }

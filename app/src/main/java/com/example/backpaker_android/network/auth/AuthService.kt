@@ -1,6 +1,5 @@
 package com.example.backpaker_android.network.auth
 
-import android.content.SharedPreferences
 import com.example.backpaker_android.network.NetworkService
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -12,14 +11,9 @@ object AuthService {
     private val client = NetworkService.client
     private val json = Json { ignoreUnknownKeys = true }
 
-    private const val PREFS_NAME = "AuthPrefs"
-    private const val TOKEN_KEY = "token"
-
     fun init(context: Context) {
-        appContext = context.applicationContext
+        TokenService.init(context)
     }
-
-    private lateinit var appContext: Context
 
     suspend fun login(email: String, password: String): LoginResponse {
         return try {
@@ -32,7 +26,8 @@ object AuthService {
             val loginResponse = json.decodeFromString<LoginResponse>(responseBody)
 
             if (loginResponse.success) {
-                saveToken(loginResponse.token)
+                TokenService.clearToken()
+                TokenService.saveToken(loginResponse.token)
             }
 
             loginResponse
@@ -40,19 +35,6 @@ object AuthService {
             e.printStackTrace()
             LoginResponse(success = false, message = "An error occurred: ${e.message}", token = null.toString())
         }
-    }
-
-    private fun saveToken(token: String) {
-        val sharedPreferences: SharedPreferences = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        with(sharedPreferences.edit()) {
-            putString(TOKEN_KEY, token)
-            apply()
-        }
-    }
-
-    fun getToken(): String? {
-        val sharedPreferences: SharedPreferences = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        return sharedPreferences.getString(TOKEN_KEY, null)
     }
 
     suspend fun register(
