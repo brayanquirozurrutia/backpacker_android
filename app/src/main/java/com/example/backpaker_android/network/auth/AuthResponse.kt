@@ -12,5 +12,6 @@ data class AuthResponse(
 data class LoginResponse(
     val success: Boolean,
     val message: String,
-    val token: String
+    val token: String = "",
+    val isActive: Boolean? = null
 )

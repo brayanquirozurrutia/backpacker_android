@@ -9,15 +9,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
-import com.example.backpaker_android.network.auth.AuthService
+import com.example.backpaker_android.network.NetworkService
 import com.example.backpaker_android.ui.theme.Backpaker_androidTheme
+import com.example.backpaker_android.utils.SessionManager
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        AuthService.init(applicationContext)
+
+        NetworkService.initialize {
+            SessionManager.getCurrentToken()
+        }
+
         setContent {
             Backpaker_androidTheme {
                 val navController = rememberNavController()
@@ -28,6 +35,10 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
+        }
+
+        lifecycleScope.launch {
+            val token = SessionManager.getAccessToken(applicationContext)
         }
     }
 }

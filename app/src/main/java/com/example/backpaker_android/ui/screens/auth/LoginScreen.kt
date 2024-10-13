@@ -17,7 +17,8 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onCreateAccount: () -> Unit,
     loginViewModel: LoginViewModel = viewModel(),
-    onForgotPassword: () -> Unit
+    onForgotPassword: () -> Unit,
+    onNavigateToActivateAccount: () -> Unit
 ) {
     val email by loginViewModel.email.collectAsState()
     val password by loginViewModel.password.collectAsState()
@@ -61,14 +62,27 @@ fun LoginScreen(
             error = passwordError,
             required = true
         )
+
         Spacer(modifier = Modifier.height(16.dp))
+
+        errorMessage?.let {
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         if (isLoading) {
             Loading(modifier = Modifier.fillMaxSize())
         } else {
             CommonButton(
                 text = "Iniciar Sesión",
-                onClick = { loginViewModel.onLogin(onLoginSuccess) },
+                onClick = { loginViewModel.onLogin(
+                    onLoginSuccess = onLoginSuccess,
+                    onAccountNotActive = onNavigateToActivateAccount
+                ) },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -81,15 +95,6 @@ fun LoginScreen(
                 TextButton(onClick = onCreateAccount) {
                     Text("Crear cuenta")
                 }
-            }
-
-            errorMessage?.let {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
-                )
             }
         }
     }

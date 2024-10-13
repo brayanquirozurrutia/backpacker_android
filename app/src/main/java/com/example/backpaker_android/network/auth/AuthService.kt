@@ -5,15 +5,10 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.serialization.json.Json
-import android.content.Context
 
 object AuthService {
     private val client = NetworkService.client
     private val json = Json { ignoreUnknownKeys = true }
-
-    fun init(context: Context) {
-        TokenService.init(context)
-    }
 
     suspend fun login(email: String, password: String): LoginResponse {
         return try {
@@ -23,14 +18,7 @@ object AuthService {
             }
 
             val responseBody = response.bodyAsText()
-            val loginResponse = json.decodeFromString<LoginResponse>(responseBody)
-
-            if (loginResponse.success) {
-                TokenService.clearToken()
-                TokenService.saveToken(loginResponse.token)
-            }
-
-            loginResponse
+            json.decodeFromString<LoginResponse>(responseBody)
         } catch (e: Exception) {
             e.printStackTrace()
             LoginResponse(success = false, message = "An error occurred: ${e.message}", token = null.toString())
@@ -72,6 +60,41 @@ object AuthService {
         }
     }
 
+    suspend fun activateAccount(email: String, token: String): AuthResponse {
+        return try {
+            val response: HttpResponse = client.post("http://10.0.2.2:8080/auth/activate-account") {
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("email" to email, "token" to token))
+            }
+
+            val responseBody = response.bodyAsText()
+            json.decodeFromString<AuthResponse>(responseBody)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            AuthResponse(success = false, message = "Error: ${e.message}")
+        }
+    }
+
+    suspend fun resendToken(email: String, tokenType: String): AuthResponse {
+        return try {
+            val response: HttpResponse = client.post("http://10.0.2.2:8080/auth/resend-token") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    mapOf(
+                        "email" to email,
+                        "tokenType" to tokenType
+                    )
+                )
+            }
+
+            val responseBody = response.bodyAsText()
+            json.decodeFromString<AuthResponse>(responseBody)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            AuthResponse(success = false, message = "Error: ${e.message}")
+        }
+    }
+
     suspend fun forgotPassword(email: String): AuthResponse {
         return try {
             val response: HttpResponse = client.post("http://10.0.2.2:8080/auth/forgot-password") {
@@ -87,18 +110,25 @@ object AuthService {
         }
     }
 
-    suspend fun resetPassword(email: String, password: String, confirmPassword: String): AuthResponse {
+    suspend fun resetPassword(email: String, token: String, password: String, confirmPassword: String): AuthResponse {
         return try {
             val response: HttpResponse = client.post("http://10.0.2.2:8080/auth/reset-password") {
                 contentType(ContentType.Application.Json)
-                setBody(mapOf("email" to email, "password" to password, "confirmPassword" to confirmPassword))
+                setBody(
+                    mapOf(
+                        "email" to email,
+                        "token" to token,
+                        "password" to password,
+                        "confirmPassword" to confirmPassword
+                    )
+                )
             }
 
             val responseBody = response.bodyAsText()
-            json.decodeFromString<AuthResponse>(responseBody)
+            json.decodeFromString(AuthResponse.serializer(), responseBody)
         } catch (e: Exception) {
             e.printStackTrace()
-            AuthResponse(success = false, message = "An error occurred: ${e.message}")
+            AuthResponse(success = false, message = "Error: ${e.message}")
         }
     }
 }
