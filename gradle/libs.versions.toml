@@ -1,12 +1,15 @@
 [versions]
-agp = "8.6.1"
+agp = "8.7.0"
 android = "10.10.0"
 androidVersion = "10.13.1"
+datastorePreferences = "1.1.1"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
+kotlinxCoroutinesAndroid = "1.8.1"
+kotlinxCoroutinesCore = "1.8.1"
 ktorClientCio = "2.3.0"
 ktorClientCioVersion = "3.0.0-rc-1"
 ktorClientContentNegotiation = "2.3.0"
@@ -37,6 +40,7 @@ navigationRuntimeKtx = "2.8.0"
 navigationCompose = "2.8.0"
 playServicesMaps = "19.0.0"
 playServicesLocation = "21.3.0"
+securityCrypto = "1.1.0-alpha06"
 storage = "1.5.0"
 
 [libraries]
@@ -44,7 +48,9 @@ android = { module = "com.mapbox.maps:android", version.ref = "android" }
 android-v10131 = { module = "com.mapbox.maps:android", version.ref = "androidVersion" }
 android-v1161 = { module = "com.mapbox.maps:android", version.ref = "mapboxAndroid" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-multidex = { module = "androidx.multidex:multidex", version.ref = "multidex" }
+androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 extension-maps-compose = { module = "com.mapbox.extension:maps-compose", version.ref = "mapsComposeVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -59,6 +65,8 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktorClientCio" }
 ktor-client-cio-v234 = { module = "io.ktor:ktor-client-cio", version.ref = "ktorKtorClientCio" }
 ktor-client-cio-v300rc1 = { module = "io.ktor:ktor-client-cio", version.ref = "ktorClientCioVersion" }

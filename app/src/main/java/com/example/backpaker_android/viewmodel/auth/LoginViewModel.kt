@@ -1,16 +1,17 @@
 package com.example.backpaker_android.viewmodel.auth
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import com.example.backpaker_android.network.auth.AuthService
-import com.example.backpaker_android.network.auth.AuthResponse
 import com.example.backpaker_android.network.auth.LoginResponse
+import com.example.backpaker_android.utils.SessionManager
 import com.example.backpaker_android.utils.Utils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _email = MutableStateFlow("")
     val email: StateFlow<String> = _email
@@ -30,7 +31,7 @@ class LoginViewModel : ViewModel() {
     private val _passwordError = MutableStateFlow<String?>(null)
     val passwordError: StateFlow<String?> = _passwordError
 
-    fun onLogin(onLoginSuccess: () -> Unit) {
+    fun onLogin(onLoginSuccess: () -> Unit, onAccountNotActive: () -> Unit) {
         if (validateInputs()) {
             viewModelScope.launch {
                 _isLoading.value = true
@@ -40,13 +41,18 @@ class LoginViewModel : ViewModel() {
                     _isLoading.value = false
 
                     if (response.success) {
+                        SessionManager.setAccessToken(getApplication(), response.token)
                         onLoginSuccess()
                     } else {
-                        _errorMessage.value = response.message ?: "Login failed"
+                        if (response.isActive == false) {
+                            SessionManager.setUserEmail(getApplication(), _email.value)
+                            onAccountNotActive()
+                        }
+                        _errorMessage.value = response.message
                     }
                 } catch (e: Exception) {
                     _isLoading.value = false
-                    _errorMessage.value = "An error occurred: ${e.message}"
+                    _errorMessage.value = "Ocurrió un error: ${e.message}"
                 }
             }
         }

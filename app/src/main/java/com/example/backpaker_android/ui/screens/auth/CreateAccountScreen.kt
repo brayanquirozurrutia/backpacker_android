@@ -100,6 +100,15 @@ fun CreateAccountScreen(
                 viewModel.onBirthDateChanged(date)
             }
 
+            if (birthDateError != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = birthDateError!!,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
 
             CommonSelect(
@@ -109,7 +118,18 @@ fun CreateAccountScreen(
                 label = "Género",
                 modifier = Modifier.fillMaxWidth(),
             )
+
+            if(genderError != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = genderError!!,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
+
             CommonInput(
                 value = password,
                 onValueChange = { viewModel.onPasswordChanged(it) },
@@ -160,7 +180,7 @@ fun CreateAccountScreen(
         if (showAlert) {
             CommonBasicAlert(
                 title = "Registro Exitoso",
-                message = "Tu cuenta ha sido creada exitosamente.",
+                message = "Tu cuenta ha sido creada exitosamente. Revisa tu correo para activarla.",
                 buttonText = "Aceptar",
                 onDismiss = { showAlert = false },
                 onConfirm = {

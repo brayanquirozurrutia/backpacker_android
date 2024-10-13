@@ -18,6 +18,9 @@ fun CommonInput(
     error: String? = null,
     placeholder: String? = null,
     required: Boolean = false,
+    maxLength: Int? = null,
+    singleLine: Boolean = false,
+    enabled: Boolean = true
 ) {
     Column(modifier) {
         Text(
@@ -25,9 +28,19 @@ fun CommonInput(
             style = MaterialTheme.typography.labelMedium
         )
 
+        val filteredValue = if (maxLength != null) {
+            value.take(maxLength)
+        } else {
+            value
+        }
+
         TextField(
-            value = value,
-            onValueChange = onValueChange,
+            value = filteredValue,
+            onValueChange = { newValue ->
+                if (maxLength == null || newValue.length <= maxLength) {
+                    onValueChange(newValue)
+                }
+            },
             placeholder = { Text(placeholder ?: "") },
             visualTransformation = when (inputType) {
                 InputType.Password -> PasswordVisualTransformation()
@@ -44,6 +57,8 @@ fun CommonInput(
                 }
             ),
             isError = error != null,
+            singleLine = singleLine,
+            enabled = enabled,
             modifier = modifier
         )
 

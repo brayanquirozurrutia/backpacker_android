@@ -1,11 +1,13 @@
 package com.example.backpaker_android.viewmodel.auth
 
+import android.app.Application
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.backpaker_android.network.auth.AuthService
 import com.example.backpaker_android.network.auth.AuthResponse
+import com.example.backpaker_android.utils.SessionManager
 import com.example.backpaker_android.utils.Utils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +18,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
 @RequiresApi(Build.VERSION_CODES.O)
-class RegisterViewModel : ViewModel() {
+class RegisterViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _firstName = MutableStateFlow("")
     val firstName: StateFlow<String> = _firstName
@@ -82,6 +84,41 @@ class RegisterViewModel : ViewModel() {
 
             var hasError = false
 
+            if (cleanedFirstName.isEmpty()) {
+                _firstNameError.value = "El nombre es requerido"
+                hasError = true
+            }
+
+            if (cleanedLastName.isEmpty()) {
+                _lastNameError.value = "El apellido es requerido"
+                hasError = true
+            }
+
+            if (cleanedEmail.isEmpty()) {
+                _emailError.value = "El correo es requerido"
+                hasError = true
+            }
+
+            if (cleanedBirthDate.isEmpty()) {
+                _birthDateError.value = "La fecha de nacimiento es requerida"
+                hasError = true
+            }
+
+            if (cleanedGender.isEmpty()) {
+                _genderError.value = "El género es requerido"
+                hasError = true
+            }
+
+            if (cleanedPassword.isEmpty()) {
+                _passwordError.value = "La contraseña es requerida"
+                hasError = true
+            }
+
+            if (cleanedConfirmPassword.isEmpty()) {
+                _confirmPasswordError.value = "La contraseña es requerida"
+                hasError = true
+            }
+
             if (cleanedPassword != cleanedConfirmPassword) {
                 _confirmPasswordError.value = "Las contraseñas no coinciden"
                 hasError = true
@@ -124,6 +161,7 @@ class RegisterViewModel : ViewModel() {
                     _isLoading.value = false
 
                     if (response.success) {
+                        SessionManager.setUserEmail(getApplication(), cleanedEmail)
                         onRegisterSuccess()
                     } else {
                         _errorMessage.value = response.message ?: "Registration failed"
