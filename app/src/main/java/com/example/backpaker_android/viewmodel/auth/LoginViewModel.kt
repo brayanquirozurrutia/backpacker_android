@@ -42,6 +42,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
                     if (response.success) {
                         SessionManager.setAccessToken(getApplication(), response.token)
+                        SessionManager.setUserId(getApplication(), response.userId)
                         onLoginSuccess()
                     } else {
                         if (response.isActive == false) {
@@ -52,6 +53,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 } catch (e: Exception) {
                     _isLoading.value = false
+                    println("Ocurrió un error: ${e.message}")
                     _errorMessage.value = "Ocurrió un error: ${e.message}"
                 }
             }

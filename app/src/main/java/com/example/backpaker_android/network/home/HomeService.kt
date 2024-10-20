@@ -17,7 +17,6 @@ object HomeService {
     suspend fun getHomeData(): HomeResponse {
         return try {
 
-            // TODO: VER ESTO PARA HACER UN INTEERCEPTOR DEL TOKEN
             val token = NetworkService.tokenProvider?.invoke()
 
             val response: HttpResponse = client.post("http://10.0.2.2:8080/home/") {
@@ -28,7 +27,6 @@ object HomeService {
             }
 
             val responseBody = response.bodyAsText()
-            println("Response from /home: $responseBody")
             json.decodeFromString<HomeResponse>(responseBody)
         } catch (e: Exception) {
             e.printStackTrace()

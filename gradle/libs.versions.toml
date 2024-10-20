@@ -1,5 +1,5 @@
 [versions]
-agp = "8.7.0"
+agp = "8.7.1"
 android = "10.10.0"
 androidVersion = "10.13.1"
 datastorePreferences = "1.1.1"
@@ -23,6 +23,7 @@ ktorClientSerialization = "2.3.0"
 ktorKtorClientCio = "2.3.4"
 ktorKtorClientContentNegotiation = "2.3.4"
 ktorKtorClientCore = "2.3.4"
+ktorKtorClientLogging = "2.3.0"
 ktorKtorSerializationKotlinxJson = "2.3.4"
 ktorSerializationKotlinxJson = "2.3.0"
 ktorSerializationKotlinxJsonVersion = "3.0.0-rc-1"
@@ -78,6 +79,7 @@ ktor-client-core-v234 = { module = "io.ktor:ktor-client-core", version.ref = "kt
 ktor-client-core-v300rc1 = { module = "io.ktor:ktor-client-core", version.ref = "ktorClientCoreVersion" }
 ktor-client-logging = { module = "io.ktor:ktor-client-logging" }
 ktor-client-logging-jvm = { module = "io.ktor:ktor-client-logging-jvm", version.ref = "ktorClientLoggingJvm" }
+ktor-client-logging-v230 = { module = "io.ktor:ktor-client-logging", version.ref = "ktorKtorClientLogging" }
 ktor-client-logging-v234 = { module = "io.ktor:ktor-client-logging", version.ref = "ktorClientLoggingVersion" }
 ktor-client-serialization = { module = "io.ktor:ktor-client-serialization", version.ref = "ktorClientSerialization" }
 ktor-ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktorClientLogging" }

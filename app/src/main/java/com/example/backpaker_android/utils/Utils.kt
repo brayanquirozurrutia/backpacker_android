@@ -21,9 +21,12 @@ object SessionManager {
     private const val FILE_NAME = "encrypted_session_preferences"
     private const val USER_EMAIL_KEY = "user_email"
     private const val TOKEN_KEY = "access_token"
+    private const val USER_ID_KEY = "user_id"
 
     @Volatile
     private var inMemoryToken: String? = null
+    @Volatile
+    private var inMemoryUserId: Int? = null
 
     private fun getEncryptedPreferences(context: Context) =
         EncryptedSharedPreferences.create(
@@ -68,9 +71,31 @@ object SessionManager {
         }
     }
 
+    fun setUserId(context: Context, userId: Int?) {
+        val prefs = getEncryptedPreferences(context).edit()
+        if (userId == null) {
+            prefs.remove(USER_ID_KEY)
+        } else {
+            prefs.putInt(USER_ID_KEY, userId)
+            println("ID de usuario almacenado: $userId")
+        }
+        prefs.apply()
+        inMemoryUserId = userId
+    }
+
+    fun getUserId(context: Context): Int? {
+        return inMemoryUserId ?: getEncryptedPreferences(context).getInt(USER_ID_KEY, -1).takeIf { it != -1 }.also {
+            inMemoryUserId = it
+            println("ID de usuario recuperado: $it")
+        }
+    }
+
     fun getCurrentToken(): String? = inMemoryToken
 
-    fun clearAccessToken(context: Context) {
+    fun getCurrentUserId(): Int? = inMemoryUserId
+
+    fun clearSession(context: Context) {
         setAccessToken(context, null)
+        setUserId(context, null)
     }
 }
