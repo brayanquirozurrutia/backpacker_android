@@ -13,5 +13,6 @@ data class LoginResponse(
     val success: Boolean,
     val message: String,
     val token: String = "",
-    val isActive: Boolean? = null
+    val isActive: Boolean? = null,
+    val userId: Int? = null
 )

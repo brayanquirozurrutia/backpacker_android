@@ -7,13 +7,6 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -28,37 +21,74 @@ import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.locationcomponent.location
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.navigation.NavController
 import com.example.backpaker_android.viewmodel.home.HomeViewModel
 import com.example.backpaker_android.ui.components.Loading
+import com.example.backpaker_android.viewmodel.trip.TripViewModel
 
 @Composable
-fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
+fun HomeScreen(
+    navController: NavController,
+    homeViewModel: HomeViewModel = viewModel(),
+    tripViewModel: TripViewModel = viewModel()
+) {
     val context = LocalContext.current
-    val mapView = rememberMapViewWithLifecycle(context)
+    val mapView = rememberMapView(context)
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
     var latitude by remember { mutableDoubleStateOf(0.0) }
     var longitude by remember { mutableDoubleStateOf(0.0) }
+
     var showPermissionDialog by remember { mutableStateOf(false) }
 
     val isLoading by homeViewModel.isLoading.collectAsState()
     val errorMessage by homeViewModel.errorMessage.collectAsState()
     val isDataLoaded by homeViewModel.isDataLoaded.collectAsState()
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycle = lifecycleOwner.lifecycle
+
+    DisposableEffect(lifecycle, mapView) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                if (context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                        location?.let {
+                            latitude = it.latitude
+                            longitude = it.longitude
+
+                            mapView.mapboxMap.setCamera(
+                                CameraOptions.Builder()
+                                    .center(Point.fromLngLat(longitude, latitude))
+                                    .zoom(15.0)
+                                    .build()
+                            )
+                        }
+                    }
+                } else {
+                    showPermissionDialog = true
+                }
+            }
+        }
+
+        lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycle.removeObserver(observer)
+        }
+    }
+
     LaunchedEffect(Unit) {
         homeViewModel.fetchHomeData()
-        if (context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (
+            context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 location?.let {
                     latitude = it.latitude
                     longitude = it.longitude
+                    tripViewModel.updateCoordinates(latitude, longitude)
                 }
             }
         } else {
@@ -119,33 +149,6 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
                     Text(text = errorMessage!!)
                 }
             }
-
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.White,
-                modifier = Modifier.height(56.dp)
-            ) {
-                val icons = listOf(
-                    Icons.Filled.Home to "Inicio",
-                    Icons.Filled.Search to "Buscar",
-                    Icons.Filled.Add to "Agregar",
-                    Icons.Filled.Favorite to "Favoritos",
-                    Icons.Filled.Person to "Perfil"
-                )
-                icons.forEach { (icon, label) ->
-                    NavigationBarItem(
-                        icon = { Icon(icon, contentDescription = null) },
-                        label = { Text(label) },
-                        selected = false, // Cambia esta lógica según la selección
-                        onClick = { /* Acción de navegación */ },
-                        alwaysShowLabel = true,
-                        colors = NavigationBarItemDefaults.colors(
-                            unselectedIconColor = Color.LightGray,
-                            selectedIconColor = Color.White
-                        )
-                    )
-                }
-            }
         }
     }
 }
@@ -160,8 +163,10 @@ private fun requestLocationPermission(context: Context) {
 }
 
 @Composable
-fun rememberMapViewWithLifecycle(context: Context): MapView {
-    return MapView(context)
+fun rememberMapView(context: Context): MapView {
+    return remember {
+        MapView(context)
+    }
 }
 
 const val LOCATION_PERMISSION_REQUEST_CODE = 1000
