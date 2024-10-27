@@ -5,28 +5,20 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.backpaker_android.navigation.Routes
 import com.example.backpaker_android.ui.components.CommonNavigationBar
-import com.example.backpaker_android.ui.components.TripDialog
 import com.example.backpaker_android.ui.screens.auth.AccountActivationScreen
 import com.example.backpaker_android.ui.screens.auth.CreateAccountScreen
 import com.example.backpaker_android.ui.screens.auth.ForgotPasswordScreen
 import com.example.backpaker_android.ui.screens.home.HomeScreen
 import com.example.backpaker_android.ui.screens.auth.LoginScreen
-import com.example.backpaker_android.viewmodel.trip.TripViewModel
+import com.example.backpaker_android.ui.screens.trip.TripScreen
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -39,18 +31,11 @@ fun AppNavigation(
     val currentRoute = navBackStackEntry?.destination?.route
 
     val bottomBarRoutes = listOf(Routes.HOME, Routes.TRIP)
-    var showTripDialog by remember { mutableStateOf(false) }
-    val tripViewModel: TripViewModel = viewModel()
-
-    val context = LocalContext.current
 
     Scaffold(
         bottomBar = {
             if (currentRoute in bottomBarRoutes) {
-                CommonNavigationBar(
-                    navController = navController,
-                    onTripClick = { showTripDialog = true }
-                )
+                CommonNavigationBar(navController = navController)
             }
         }
     ) { innerPadding ->
@@ -90,21 +75,13 @@ fun AppNavigation(
             composable(Routes.HOME) {
                 HomeScreen(navController = navController)
             }
-        }
-        if (showTripDialog) {
-            TripDialog(
-                onDismiss = { showTripDialog = false },
-                onConfirm = { destination ->
-                    if (destination.isNotBlank()) {
-                        // Llama al ViewModel solo cuando el destino no esté vacío.
-                        tripViewModel.sendTrip(destination, context)
-                    }
-                    showTripDialog = false
-                },
-                isLoading = tripViewModel.isLoading.collectAsState().value,
-                errorMessage = tripViewModel.errorMessage.collectAsState().value
-            )
 
+            composable(Routes.TRIP) {
+                TripScreen(
+                    navController = navController,
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }

@@ -2,22 +2,24 @@ package com.example.backpaker_android.ui.screens.home
 
 import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
-import androidx.activity.ComponentActivity
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.android.gms.location.LocationServices
-import com.mapbox.geojson.Point
-import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.locationcomponent.location
@@ -25,148 +27,156 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.example.backpaker_android.viewmodel.home.HomeViewModel
 import com.example.backpaker_android.ui.components.Loading
-import com.example.backpaker_android.viewmodel.trip.TripViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.MultiplePermissionsState
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import android.provider.Settings
+import androidx.compose.material3.*
+import com.example.backpaker_android.utils.getCurrentLocation
+import com.example.backpaker_android.viewmodel.home.HomeUiState
+import com.google.accompanist.permissions.*
+import com.mapbox.geojson.Point
+import com.mapbox.maps.CameraOptions
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun HomeScreen(
     navController: NavController,
     homeViewModel: HomeViewModel = viewModel(),
-    tripViewModel: TripViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val mapView = rememberMapView(context)
-    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
-    var latitude by remember { mutableDoubleStateOf(0.0) }
-    var longitude by remember { mutableDoubleStateOf(0.0) }
-
-    var showPermissionDialog by remember { mutableStateOf(false) }
-
-    val isLoading by homeViewModel.isLoading.collectAsState()
-    val errorMessage by homeViewModel.errorMessage.collectAsState()
-    val isDataLoaded by homeViewModel.isDataLoaded.collectAsState()
+    val uiState by homeViewModel.uiState.collectAsState()
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val lifecycle = lifecycleOwner.lifecycle
 
-    DisposableEffect(lifecycle, mapView) {
-        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
-            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
-                if (context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                        location?.let {
-                            latitude = it.latitude
-                            longitude = it.longitude
-
-                            mapView.mapboxMap.setCamera(
-                                CameraOptions.Builder()
-                                    .center(Point.fromLngLat(longitude, latitude))
-                                    .zoom(15.0)
-                                    .build()
-                            )
-                        }
-                    }
-                } else {
-                    showPermissionDialog = true
-                }
-            }
-        }
-
-        lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycle.removeObserver(observer)
-        }
-    }
+    val locationPermissionsState = rememberMultiplePermissionsState(
+        permissions = listOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+    )
 
     LaunchedEffect(Unit) {
         homeViewModel.fetchHomeData()
-        if (
-            context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                location?.let {
-                    latitude = it.latitude
-                    longitude = it.longitude
-                    tripViewModel.updateCoordinates(latitude, longitude)
-                }
+        locationPermissionsState.launchMultiplePermissionRequest()
+    }
+
+    DisposableEffect(lifecycle, mapView) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            when (event) {
+                androidx.lifecycle.Lifecycle.Event.ON_START -> mapView.onStart()
+                androidx.lifecycle.Lifecycle.Event.ON_STOP -> mapView.onStop()
+                else -> {}
             }
-        } else {
-            showPermissionDialog = true
+        }
+        lifecycle.addObserver(observer)
+        onDispose {
+            lifecycle.removeObserver(observer)
+            mapView.onDestroy()
         }
     }
 
-    if (showPermissionDialog) {
-        AlertDialog(
-            onDismissRequest = { showPermissionDialog = false },
-            title = { Text("Permisos de ubicación") },
-            text = { Text("Esta aplicación necesita acceso a su ubicación para mostrar su posición en el mapa.") },
-            confirmButton = {
-                Button(onClick = {
-                    requestLocationPermission(context)
-                    showPermissionDialog = false
-                }) {
-                    Text("Aceptar")
-                }
-            },
-            dismissButton = {
-                Button(onClick = { showPermissionDialog = false }) {
-                    Text("Cancelar")
-                }
-            }
-        )
-    }
-
-    if (isDataLoaded) {
-        Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        if (locationPermissionsState.allPermissionsGranted) {
             Box(modifier = Modifier.weight(1f)) {
                 AndroidView({ mapView }) { mapView ->
                     mapView.mapboxMap.loadStyle(
-                        style = Style.MAPBOX_STREETS,
-                        onStyleLoaded = {
-                            mapView.location.updateSettings {
-                                enabled = true
-                                pulsingEnabled = true
-                            }
-
-                            if (latitude != 0.0 && longitude != 0.0) {
-                                mapView.mapboxMap.setCamera(
-                                    CameraOptions.Builder()
-                                        .center(Point.fromLngLat(longitude, latitude))
-                                        .zoom(15.0)
-                                        .build()
-                                )
-                            }
+                        style = Style.MAPBOX_STREETS
+                    ) {
+                        mapView.location.updateSettings {
+                            enabled = true
+                            pulsingEnabled = true
                         }
-                    )
+                    }
                 }
 
-                if (isLoading) {
-                    Loading()
+                LaunchedEffect(Unit) {
+                    val location = getCurrentLocation(context)
+                    location?.let {
+                        mapView.mapboxMap.setCamera(
+                            CameraOptions.Builder()
+                                .center(Point.fromLngLat(it.longitude, it.latitude))
+                                .zoom(15.0)
+                                .build()
+                        )
+                    } ?: run {
+                        // TODO: MOSTRAR UN SNACKBAR O UN TOAST CUANDO NO SE PUEDE OBTENER LA UBICACIÓN
+                        println("Ubicación no disponible al cargar el mapa.")
+                    }
                 }
 
-                if (errorMessage != null) {
-                    Text(text = errorMessage!!)
+                when (uiState) {
+                    is HomeUiState.Loading -> Loading()
+                    is HomeUiState.Success -> {
+                        // Aquí puedes mostrar datos adicionales si lo deseas
+                    }
+                    is HomeUiState.Error -> {
+                        val error = (uiState as HomeUiState.Error).message
+                        Text(text = error, color = MaterialTheme.colorScheme.error)
+                    }
                 }
             }
+        } else {
+            PermissionDeniedContent(
+                permissionsState = locationPermissionsState
+            )
         }
     }
 }
 
-private fun requestLocationPermission(context: Context) {
-    if (context is ComponentActivity) {
-        context.requestPermissions(
-            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-            LOCATION_PERMISSION_REQUEST_CODE
-        )
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun PermissionDeniedContent(
+    permissionsState: MultiplePermissionsState
+) {
+    val context = LocalContext.current
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        when {
+            permissionsState.shouldShowRationale -> {
+                Text("La aplicación necesita acceder a tu ubicación para mostrar tu posición en el mapa.")
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(onClick = { permissionsState.launchMultiplePermissionRequest() }) {
+                    Text("Permitir")
+                }
+            }
+            permissionsState.permissions.any {
+                !it.status.isGranted && !it.status.shouldShowRationale
+            } -> {
+                Text("Permisos de ubicación denegados. Puedes habilitarlos desde la configuración.")
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(onClick = {
+                    val intent = Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.fromParts("package", context.packageName, null)
+                    )
+                    context.startActivity(intent)
+                }) {
+                    Text("Configuración")
+                }
+            }
+            else -> {
+                Button(onClick = { permissionsState.launchMultiplePermissionRequest() }) {
+                    Text("Solicitar Permisos")
+                }
+            }
+        }
     }
 }
 
 @Composable
 fun rememberMapView(context: Context): MapView {
     return remember {
-        MapView(context)
+        MapView(context).apply {
+            // Configuraciones adicionales si es necesario
+        }
     }
 }
-
-const val LOCATION_PERMISSION_REQUEST_CODE = 1000

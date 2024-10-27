@@ -5,6 +5,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.text.input.KeyboardType
 
@@ -20,7 +21,10 @@ fun CommonInput(
     required: Boolean = false,
     maxLength: Int? = null,
     singleLine: Boolean = false,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    leadingIcon: ImageVector? = null,
+    trailingIcon: ImageVector? = null,
+    onTrailingIconClick: (() -> Unit)? = null
 ) {
     Column(modifier) {
         Text(
@@ -42,6 +46,16 @@ fun CommonInput(
                 }
             },
             placeholder = { Text(placeholder ?: "") },
+            leadingIcon = if (leadingIcon != null) {
+                { Icon(imageVector = leadingIcon, contentDescription = null) }
+            } else null,
+            trailingIcon = if (trailingIcon != null) {
+                {
+                    IconButton(onClick = { onTrailingIconClick?.invoke() }) {
+                        Icon(imageVector = trailingIcon, contentDescription = null)
+                    }
+                }
+            } else null,
             visualTransformation = when (inputType) {
                 InputType.Password -> PasswordVisualTransformation()
                 else -> VisualTransformation.None
