@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.height
 @Composable
 fun CommonNavigationBar(
     navController: NavController,
-    onTripClick: () -> Unit
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -39,41 +38,27 @@ fun CommonNavigationBar(
         )
 
         items.forEach { item ->
-            if (item.route == Routes.TRIP) {
-                NavigationBarItem(
-                    icon = { Icon(item.icon, contentDescription = item.label) },
-                    label = { Text(item.label) },
-                    selected = false,
-                    onClick = { onTripClick() },
-                    alwaysShowLabel = true,
-                    colors = NavigationBarItemDefaults.colors(
-                        unselectedIconColor = Color.LightGray,
-                        selectedIconColor = Color.White
-                    )
-                )
-            } else {
-                NavigationBarItem(
-                    icon = { Icon(item.icon, contentDescription = item.label) },
-                    label = { Text(item.label) },
-                    selected = currentRoute == item.route,
-                    onClick = {
-                        if (currentRoute != item.route) {
-                            navController.navigate(item.route) {
-                                launchSingleTop = true
-                                popUpTo(Routes.HOME) {
-                                    saveState = true
-                                }
-                                restoreState = true
+            NavigationBarItem(
+                icon = { Icon(item.icon, contentDescription = item.label) },
+                label = { Text(item.label) },
+                selected = currentRoute == item.route,
+                onClick = {
+                    if (currentRoute != item.route) {
+                        navController.navigate(item.route) {
+                            launchSingleTop = true
+                            popUpTo(Routes.HOME) {
+                                saveState = true
                             }
+                            restoreState = true
                         }
-                    },
-                    alwaysShowLabel = true,
-                    colors = NavigationBarItemDefaults.colors(
-                        unselectedIconColor = Color.LightGray,
-                        selectedIconColor = Color.White
-                    )
+                    }
+                },
+                alwaysShowLabel = true,
+                colors = NavigationBarItemDefaults.colors(
+                    unselectedIconColor = Color.LightGray,
+                    selectedIconColor = Color.White
                 )
-            }
+            )
         }
     }
 }
