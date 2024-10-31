@@ -11,6 +11,8 @@ import com.example.backpaker_android.network.trip.TripService
 import com.example.backpaker_android.network.trip.TripResponse
 import com.example.backpaker_android.utils.SessionManager
 import com.example.backpaker_android.utils.getCurrentLocation
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class TripViewModel(application: Application) : AndroidViewModel(application) {
@@ -28,6 +30,12 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _successMessage = MutableStateFlow<String?>(null)
     val successMessage: StateFlow<String?> = _successMessage
+
+    private val _showSuccessDialog = MutableStateFlow(false)
+    val showSuccessDialog: StateFlow<Boolean> = _showSuccessDialog.asStateFlow()
+
+    private val _navigationEvent = MutableSharedFlow<Unit>()
+    val navigationEvent = _navigationEvent.asSharedFlow()
 
     fun updateDestination(newDestination: String) {
         _destination.value = newDestination
@@ -76,6 +84,7 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
                 if (response.success) {
                     _successMessage.value = "Viaje creado exitosamente."
                     _destination.value = ""
+                    _showSuccessDialog.value = true
                 } else {
                     _errorMessage.value = response.message ?: "Error al crear el viaje."
                 }
@@ -86,11 +95,15 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun resetSuccessMessage() {
-        _successMessage.value = null
+    fun onConfirmDialog() {
+        viewModelScope.launch {
+            _showSuccessDialog.value = false
+            _navigationEvent.emit(Unit)
+        }
     }
 
-    fun resetErrorMessage() {
+    fun resetMessages() {
+        _successMessage.value = null
         _errorMessage.value = null
     }
 }
