@@ -32,11 +32,28 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import android.provider.Settings
 import androidx.compose.material3.*
+import com.example.backpaker_android.network.home.TripData
 import com.example.backpaker_android.utils.getCurrentLocation
 import com.example.backpaker_android.viewmodel.home.HomeUiState
 import com.google.accompanist.permissions.*
+import com.mapbox.android.gestures.MoveGestureDetector
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.extension.style.expressions.generated.Expression
+import com.mapbox.maps.extension.style.layers.addLayer
+import com.mapbox.maps.extension.style.layers.generated.symbolLayer
+import com.mapbox.maps.extension.style.sources.addSource
+import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
+import com.mapbox.maps.plugin.gestures.OnMoveListener
+import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.extension.style.layers.getLayer
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import androidx.compose.runtime.Composable
+import com.example.backpaker_android.R
+
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -48,6 +65,7 @@ fun HomeScreen(
     val mapView = rememberMapView(context)
 
     val uiState by homeViewModel.uiState.collectAsState()
+    val trips by homeViewModel.trips.collectAsState()
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val lifecycle = lifecycleOwner.lifecycle
@@ -60,8 +78,24 @@ fun HomeScreen(
     )
 
     LaunchedEffect(Unit) {
-        homeViewModel.fetchHomeData()
         locationPermissionsState.launchMultiplePermissionRequest()
+    }
+
+    LaunchedEffect(locationPermissionsState.allPermissionsGranted) {
+        if (locationPermissionsState.allPermissionsGranted) {
+            val location = getCurrentLocation(context)
+            location?.let {
+                homeViewModel.fetchHomeData(it.latitude, it.longitude, 10.0)
+                mapView.mapboxMap.setCamera(
+                    CameraOptions.Builder()
+                        .center(Point.fromLngLat(it.longitude, it.latitude))
+                        .zoom(15.0)
+                        .build()
+                )
+            } ?: run {
+                println("Ubicación no disponible al cargar el mapa.")
+            }
+        }
     }
 
     DisposableEffect(lifecycle, mapView) {
@@ -90,6 +124,22 @@ fun HomeScreen(
                             enabled = true
                             pulsingEnabled = true
                         }
+
+                        val onMoveListener = object : OnMoveListener {
+                            override fun onMoveBegin(detector: MoveGestureDetector) {}
+                            override fun onMove(detector: MoveGestureDetector): Boolean = false
+                            override fun onMoveEnd(detector: MoveGestureDetector) {
+                                val cameraState = mapView.mapboxMap.cameraState
+                                val center = cameraState.center
+                                homeViewModel.onMapMoved(
+                                    center.latitude(),
+                                    center.longitude(),
+                                    10.0
+                                )
+                            }
+                        }
+
+                        mapView.gestures.addOnMoveListener(onMoveListener)
                     }
                 }
 
@@ -102,11 +152,13 @@ fun HomeScreen(
                                 .zoom(15.0)
                                 .build()
                         )
+                        homeViewModel.fetchHomeData(it.latitude, it.longitude, 10.0)
                     } ?: run {
-                        // TODO: MOSTRAR UN SNACKBAR O UN TOAST CUANDO NO SE PUEDE OBTENER LA UBICACIÓN
                         println("Ubicación no disponible al cargar el mapa.")
                     }
                 }
+
+                TripsOnMap(trips = trips, mapView = mapView)
 
                 when (uiState) {
                     is HomeUiState.Loading -> Loading()
@@ -176,7 +228,71 @@ fun PermissionDeniedContent(
 fun rememberMapView(context: Context): MapView {
     return remember {
         MapView(context).apply {
-            // Configuraciones adicionales si es necesario
+        }
+    }
+}
+
+
+@Composable
+fun TripsOnMap(trips: List<TripData>, mapView: MapView) {
+    val context = LocalContext.current
+
+    val pinRequested: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.pin_requested)
+    val pinInProgress: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.pin_in_progress)
+    val pinCompleted: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.pin_completed)
+
+    LaunchedEffect(trips, mapView) {
+        mapView.mapboxMap.getStyle { style ->
+            if (!style.hasStyleImage("pin-requested")) {
+                style.addImage("pin-requested", pinRequested)
+            }
+            if (!style.hasStyleImage("pin-in_progress")) {
+                style.addImage("pin-in_progress", pinInProgress)
+            }
+            if (!style.hasStyleImage("pin-completed")) {
+                style.addImage("pin-completed", pinCompleted)
+            }
+
+            if (style.getLayer("trips-layer") != null) {
+                style.removeStyleLayer("trips-layer")
+                style.removeStyleSource("trips-source")
+            }
+
+            val features = trips.map { trip ->
+                Feature.fromGeometry(
+                    Point.fromLngLat(trip.longitude, trip.latitude)
+                ).apply {
+                    addStringProperty("status", trip.status)
+                    addStringProperty("id", trip.id.toString())
+                }
+            }
+
+            val featureCollection = FeatureCollection.fromFeatures(features)
+            val geoJsonString = featureCollection.toJson()
+
+            style.addSource(
+                geoJsonSource("trips-source") {
+                    data(geoJsonString)
+                }
+            )
+
+            style.addLayer(
+                symbolLayer("trips-layer", "trips-source") {
+                    iconImage(
+                        Expression.match(
+                            Expression.get("status"),
+                            Expression.literal("REQUESTED"),
+                            Expression.literal("pin-requested"),
+                            Expression.literal("IN_PROGRESS"),
+                            Expression.literal("pin-in_progress"),
+                            Expression.literal("COMPLETED"),
+                            Expression.literal("pin-completed"),
+                            Expression.literal("pin-requested")
+                        )
+                    )
+                    iconSize(0.125)
+                }
+            )
         }
     }
 }
