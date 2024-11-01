@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import android.Manifest
 import androidx.navigation.NavController
 import com.example.backpaker_android.navigation.Routes
+import com.example.backpaker_android.ui.components.CommonBasicAlert
 import com.example.backpaker_android.ui.components.CommonButton
 import com.example.backpaker_android.ui.components.CommonInput
 import com.example.backpaker_android.ui.components.IconPosition
@@ -33,6 +34,7 @@ fun TripScreen(
     val isLoading by tripViewModel.isLoading.collectAsState()
     val errorMessage by tripViewModel.errorMessage.collectAsState()
     val successMessage by tripViewModel.successMessage.collectAsState()
+    val showSuccessDialog by tripViewModel.showSuccessDialog.collectAsState()
 
     val locationPermissionsState = rememberMultiplePermissionsState(
         permissions = listOf(
@@ -45,16 +47,23 @@ fun TripScreen(
         locationPermissionsState.launchMultiplePermissionRequest()
     }
 
-    LaunchedEffect(successMessage) {
-
-        successMessage?.let {
+    LaunchedEffect(Unit) {
+        tripViewModel.navigationEvent.collect {
             navController.navigate(Routes.HOME) {
-                popUpTo(Routes.HOME) {
-                    inclusive = true
-                }
+                popUpTo(Routes.HOME) { inclusive = true }
                 launchSingleTop = true
             }
         }
+    }
+
+    if (showSuccessDialog) {
+        CommonBasicAlert(
+            title = "¡Viaje Creado!",
+            message = "El viaje se ha creado exitosamente.",
+            buttonText = "Aceptar",
+            onDismiss = { tripViewModel.resetMessages() },
+            onConfirm = { tripViewModel.onConfirmDialog() }
+        )
     }
 
     Scaffold(
@@ -109,15 +118,6 @@ fun TripScreen(
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
-
-                if (successMessage != null) {
-                    Text(
-                        text = successMessage!!,
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-
 
             } else {
                 PermissionDeniedContent(

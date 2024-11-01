@@ -3,6 +3,8 @@ accompanistPermissions = "0.30.1"
 agp = "8.7.1"
 android = "10.10.0"
 androidVersion = "10.13.1"
+comMapboxMapsAndroid = "10.0.0"
+comMapboxMapsAndroid2 = "10.14.0"
 datastorePreferences = "1.1.1"
 hiltAndroidVersion = "2.44"
 kotlin = "1.9.0"
@@ -46,6 +48,14 @@ navigationCompose = "2.8.0"
 playServicesLocationVersion = "21.0.1"
 playServicesMaps = "19.0.0"
 playServicesLocation = "21.3.0"
+pluginLocationcomponent = "10.0.0"
+pluginLocationcomponentVersion = "10.14.0"
+pluginStyleImages = "10.17.1"
+pluginStyleImagesVersion = "10.14.0"
+pluginStyleLayers = "10.17.1"
+pluginStyleLayersVersion = "10.14.0"
+pluginStyleSources = "10.17.1"
+pluginStyleSourcesVersion = "10.14.0"
 securityCrypto = "1.1.0-alpha06"
 slf4jSimple = "1.7.36"
 storage = "1.5.0"
@@ -53,7 +63,9 @@ storage = "1.5.0"
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 android = { module = "com.mapbox.maps:android", version.ref = "android" }
+android-v1000 = { module = "com.mapbox.maps:android", version.ref = "comMapboxMapsAndroid" }
 android-v10131 = { module = "com.mapbox.maps:android", version.ref = "androidVersion" }
+android-v10140 = { module = "com.mapbox.maps:android", version.ref = "comMapboxMapsAndroid2" }
 android-v1161 = { module = "com.mapbox.maps:android", version.ref = "mapboxAndroid" }
 android-v1171 = { module = "com.mapbox.maps:android", version.ref = "mapboxAndroidVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -108,6 +120,14 @@ play-services-maps = { module = "com.google.android.gms:play-services-maps", ver
 plugin-locationcomponent = { module = "com.mapbox.maps:plugin-locationcomponent", version.ref = "android" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 androidx-storage = { group = "androidx.test.services", name = "storage", version.ref = "storage" }
+plugin-locationcomponent-v1000 = { module = "com.mapbox.maps:plugin-locationcomponent", version.ref = "pluginLocationcomponent" }
+plugin-locationcomponent-v10140 = { module = "com.mapbox.maps:plugin-locationcomponent", version.ref = "pluginLocationcomponentVersion" }
+plugin-style-images = { module = "com.mapbox.maps:plugin-style-images", version.ref = "pluginStyleImages" }
+plugin-style-images-v10140 = { module = "com.mapbox.maps:plugin-style-images", version.ref = "pluginStyleImagesVersion" }
+plugin-style-layers = { module = "com.mapbox.maps:plugin-style-layers", version.ref = "pluginStyleLayers" }
+plugin-style-layers-v10140 = { module = "com.mapbox.maps:plugin-style-layers", version.ref = "pluginStyleLayersVersion" }
+plugin-style-sources = { module = "com.mapbox.maps:plugin-style-sources", version.ref = "pluginStyleSources" }
+plugin-style-sources-v10140 = { module = "com.mapbox.maps:plugin-style-sources", version.ref = "pluginStyleSourcesVersion" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4jSimple" }
 
 [plugins]
